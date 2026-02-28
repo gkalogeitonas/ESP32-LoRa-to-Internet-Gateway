@@ -64,7 +64,10 @@ void displayUpdate(
     int lastRssi,
     int lastSf,
     unsigned long totalPackets,
-    bool loraEnabled
+    unsigned long totalPacketsRx,
+    bool loraEnabled,
+    long loraFrequency,
+    int loraConfigSf
 ) {
     oled.clear();
 
@@ -92,7 +95,7 @@ void displayUpdate(
     // Separator
     oled.drawHorizontalLine(0, 13, 128);
 
-    // --- Activity ---
+    // --- Activity: last received packet ---
     if (!loraEnabled) {
         oled.drawString(0, 16, "LoRa OFF (low batt)");
     } else if (lastRssi == 0 && lastSf == 0) {
@@ -101,15 +104,21 @@ void displayUpdate(
         oled.drawString(0, 16, "Last: SF" + String(lastSf) + " / " + String(lastRssi) + " dBm");
     }
 
+    // --- Configured channel + SF ---
+    char chBuf[28];
+    float freqMHz = loraFrequency / 1000000.0f;
+    snprintf(chBuf, sizeof(chBuf), "Ch: %.1f MHz  SF:%d", freqMHz, loraConfigSf);
+    oled.drawString(0, 28, chBuf);
+
     // --- Counters ---
-    oled.drawHorizontalLine(0, 42, 128);
-    String fwdStr = "Fwd: " + String(totalPackets) + " pkts";
-    oled.drawString(0, 46, fwdStr);
+    oled.drawHorizontalLine(0, 40, 128);
+    char cntBuf[28];
+    snprintf(cntBuf, sizeof(cntBuf), "Rx:%lu  Fwd:%lu", totalPacketsRx, totalPackets);
+    oled.drawString(0, 44, cntBuf);
 
     // Forwarding mode indicator (right-aligned)
-    // This will be enhanced later if needed
     oled.setTextAlignment(TEXT_ALIGN_RIGHT);
-    oled.drawString(128, 46, apMode ? "AP" : (wifiConnected ? "STA" : "---"));
+    oled.drawString(128, 44, apMode ? "AP" : (wifiConnected ? "STA" : "---"));
     oled.setTextAlignment(TEXT_ALIGN_LEFT);
 
     oled.display();

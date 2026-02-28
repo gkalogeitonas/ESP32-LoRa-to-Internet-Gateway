@@ -12,7 +12,10 @@ void displayUpdate(
     int lastRssi,
     int lastSf,
     unsigned long totalPackets,
-    bool loraEnabled
+    unsigned long totalPacketsRx,
+    bool loraEnabled,
+    long loraFrequency,
+    int loraConfigSf
 );
 void displayShowMessage(const char* line1, const char* line2 = nullptr);
 

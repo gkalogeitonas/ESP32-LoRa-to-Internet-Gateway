@@ -15,6 +15,7 @@
 
 // State tracking (some are extern'd by web_server.cpp for /status)
 unsigned long totalPacketsForwarded = 0;
+unsigned long totalPacketsReceived  = 0;
 int  currentBatteryPercent = 100;
 
 static unsigned long lastBatteryCheck  = 0;
@@ -125,6 +126,7 @@ void loop() {
     if (loraActive) {
         LoRaPacket pkt;
         if (loraPoll(pkt)) {
+            totalPacketsReceived++;
             lastPacketRssi = pkt.rssi;
             lastPacketSf   = pkt.sf;
 
@@ -163,7 +165,10 @@ void loop() {
             lastPacketRssi,
             lastPacketSf,
             totalPacketsForwarded,
-            loraActive
+            totalPacketsReceived,
+            loraActive,
+            gConfig.lora_frequency,
+            gConfig.lora_sf
         );
     }
 }
