@@ -8,6 +8,7 @@ extern volatile bool flagWifiChanged;
 extern volatile bool flagLoraChanged;
 extern volatile bool flagForwardChanged;
 extern volatile bool flagRestartRequested;
+extern volatile bool flagRescanRequested;
 
 void webServerInit();
 

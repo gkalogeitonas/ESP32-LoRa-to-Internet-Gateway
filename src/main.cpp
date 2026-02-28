@@ -60,10 +60,14 @@ void setup() {
     // 5. WiFi (STA or AP)
     wifiInit(gConfig);
 
-    // 6. Web server (async, no blocking)
+    // 6. Scan WiFi networks (synchronous, before web server starts)
+    displayShowMessage("LoRa Gateway", "Scanning WiFi...");
+    wifiScanSync();
+
+    // 7. Web server (async, no blocking)
     webServerInit();
 
-    // 7. Forwarder (MQTT or HTTP)
+    // 8. Forwarder (MQTT or HTTP)
     forwarderInit(gConfig);
 
     displayShowMessage("LoRa Gateway", "Ready!");
@@ -95,6 +99,11 @@ void loop() {
         displayShowMessage("Restarting...", "");
         delay(1000);
         ESP.restart();
+    }
+    if (flagRescanRequested) {
+        flagRescanRequested = false;
+        Serial.println("[Main] WiFi rescan requested");
+        wifiScanSync();
     }
 
     // --- 1. Battery check (every 30s) ---

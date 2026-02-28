@@ -1,13 +1,14 @@
 #include "wifi_manager.h"
 #include <WiFi.h>
 #include <DNSServer.h>
-#include <ArduinoJson.h>
 
 static bool _apMode = false;
 static DNSServer _dnsServer;
 static unsigned long _lastReconnectAttempt = 0;
 static const unsigned long RECONNECT_INTERVAL = 60000;
 static const unsigned long CONNECT_TIMEOUT = 15000;
+
+static std::vector<ScannedNetwork> _networks;
 
 static void startAP() {
     WiFi.mode(WIFI_AP);
@@ -88,32 +89,41 @@ String wifiGetIP() {
     return WiFi.localIP().toString();
 }
 
-void wifiStartScan() {
-    WiFi.scanNetworks(true, false);
-    Serial.println("[WiFi] Scan started");
-}
+void wifiScanSync() {
+    _networks.clear();
+    Serial.println("[WiFi] Scanning networks...");
 
-bool wifiScanComplete() {
-    return WiFi.scanComplete() >= 0;
-}
+    int n = WiFi.scanNetworks(false, false);
 
-String wifiScanResultsJson() {
-    int n = WiFi.scanComplete();
-    if (n < 0) return "[]";
+    if (n <= 0) {
+        Serial.println("[WiFi] No networks found");
+        WiFi.scanDelete();
+        return;
+    }
 
-    JsonDocument doc;
-    JsonArray arr = doc.to<JsonArray>();
+    Serial.printf("[WiFi] Found %d networks\n", n);
 
     for (int i = 0; i < n; i++) {
-        JsonObject net = arr.add<JsonObject>();
-        net["ssid"] = WiFi.SSID(i);
-        net["rssi"] = WiFi.RSSI(i);
-        net["enc"]  = (WiFi.encryptionType(i) != WIFI_AUTH_OPEN);
+        String name = WiFi.SSID(i);
+        if (name.length() == 0) continue;
+
+        // Skip duplicates
+        bool dup = false;
+        for (const auto &existing : _networks) {
+            if (existing.ssid == name) { dup = true; break; }
+        }
+        if (dup) continue;
+
+        ScannedNetwork net;
+        net.ssid      = name;
+        net.rssi      = WiFi.RSSI(i);
+        net.encrypted = (WiFi.encryptionType(i) != WIFI_AUTH_OPEN);
+        _networks.push_back(net);
     }
 
     WiFi.scanDelete();
+}
 
-    String result;
-    serializeJson(doc, result);
-    return result;
+const std::vector<ScannedNetwork>& wifiGetNetworks() {
+    return _networks;
 }
