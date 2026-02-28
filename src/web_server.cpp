@@ -18,7 +18,7 @@ extern int currentBatteryPercent;
 static AsyncWebServer server(80);
 
 static void handleRoot(AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", PAGE_HTML);
+    request->send(200, "text/html", PAGE_HTML);
 }
 
 static void handleStatus(AsyncWebServerRequest *request) {

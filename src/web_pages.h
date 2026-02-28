@@ -71,8 +71,18 @@ button.danger:hover{background:#c0392b}
   <h2>LoRa Settings</h2>
   <div class="row">
     <div>
-      <label>Frequency (Hz)</label>
-      <input type="number" id="lora-freq" value="868000000">
+      <label>Channel (EU868)</label>
+      <select id="lora-channel" onchange="updateFreqFromChannel()">
+        <option value="868100000">Ch0: 868.1 MHz</option>
+        <option value="868300000">Ch1: 868.3 MHz</option>
+        <option value="868500000" selected>Ch2: 868.5 MHz</option>
+        <option value="867100000">Ch3: 867.1 MHz</option>
+        <option value="867300000">Ch4: 867.3 MHz</option>
+        <option value="867500000">Ch5: 867.5 MHz</option>
+        <option value="867700000">Ch6: 867.7 MHz</option>
+        <option value="867900000">Ch7: 867.9 MHz</option>
+        <option value="">Custom...</option>
+      </select>
     </div>
     <div>
       <label>Spreading Factor</label>
@@ -85,6 +95,10 @@ button.danger:hover{background:#c0392b}
         <option value="12">SF12</option>
       </select>
     </div>
+  </div>
+  <div id="custom-freq-section" class="hidden">
+    <label>Custom Frequency (Hz)</label>
+    <input type="number" id="lora-freq" value="868500000">
   </div>
   <div class="row">
     <div>
@@ -160,6 +174,14 @@ button.danger:hover{background:#c0392b}
 <script>
 function $(id){return document.getElementById(id)}
 
+function updateFreqFromChannel(){
+  var ch=$('lora-channel').value;
+  $('custom-freq-section').classList.toggle('hidden',ch!=='');
+  if(ch!==''){
+    $('lora-freq').value=ch;
+  }
+}
+
 function toggleFwd(){
   var m=document.querySelector('input[name="fwd-mode"]:checked').value;
   $('mqtt-section').classList.toggle('hidden',m!=='mqtt');
@@ -187,8 +209,9 @@ function saveWifi(){
 }
 
 function saveLora(){
+  var freq=$('lora-freq').value;
   post('/save/lora',{
-    frequency:$('lora-freq').value,
+    frequency:freq,
     sf:$('lora-sf').value,
     bandwidth:$('lora-bw').value,
     coding_rate:$('lora-cr').value
@@ -240,7 +263,15 @@ function refreshStatus(){
     if(s.config){
       var c=s.config;
       $('wifi-ssid-manual').placeholder=c.wifi_ssid||'SSID';
-      $('lora-freq').value=c.lora_frequency;
+      // Set channel dropdown or custom freq
+      var chSel=$('lora-channel');
+      if(chSel.querySelector('option[value="'+c.lora_frequency+'"]')){
+        chSel.value=c.lora_frequency;
+      }else{
+        chSel.value='';
+        $('lora-freq').value=c.lora_frequency;
+      }
+      updateFreqFromChannel();
       $('lora-sf').value=c.lora_sf;
       $('lora-bw').value=c.lora_bandwidth;
       $('lora-cr').value=c.lora_coding_rate;
