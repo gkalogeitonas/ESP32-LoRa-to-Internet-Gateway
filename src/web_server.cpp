@@ -24,7 +24,10 @@ static void addSelected(String &html, long current, long value) {
 // Build the full page HTML with all values pre-populated server-side
 static String buildPage(const char* msg = nullptr) {
     String html;
-    html.reserve(5000);
+    html.reserve(5400);
+
+    char syncWordBuf[8];
+    snprintf(syncWordBuf, sizeof(syncWordBuf), "0x%02X", gConfig.lora_sync_word);
 
     html += PAGE_HEAD;
 
@@ -161,6 +164,11 @@ static String buildPage(const char* msg = nullptr) {
     }
     html += "</select></div></div>";
 
+    html += "<label>Sync Word (hex 0x12 or decimal 18)</label>";
+    html += "<input type=\"text\" name=\"sync_word\" value=\"";
+    html += syncWordBuf;
+    html += "\">";
+
     html += "<input type=\"submit\" value=\"Save LoRa\">";
     html += "</form></div>";
 
@@ -287,6 +295,14 @@ static void handleSaveLora(AsyncWebServerRequest *request) {
     }
     if (request->hasParam("coding_rate", true)) {
         gConfig.lora_coding_rate = request->getParam("coding_rate", true)->value().toInt();
+    }
+    if (request->hasParam("sync_word", true)) {
+        String syncWord = request->getParam("sync_word", true)->value();
+        char *endPtr = nullptr;
+        long parsed = strtol(syncWord.c_str(), &endPtr, 0);
+        if (endPtr != syncWord.c_str() && parsed >= 0 && parsed <= 255) {
+            gConfig.lora_sync_word = (uint8_t)parsed;
+        }
     }
     configSave(gConfig);
     flagLoraChanged = true;
