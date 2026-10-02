@@ -1,5 +1,10 @@
 # ESP32 LoRa-to-Internet Gateway
 
+> ## 🎓 Thesis release
+> This repository contains the LoRa-to-Internet gateway firmware developed for the thesis **"Σχεδιασμός και Υλοποίηση Πλατφόρμας Έξυπνης Γεωργίας με Ενσωμάτωση IoT Κόμβων"** (*Design and Implementation of a Smart Agriculture Platform with IoT Node Integration*) by Γεώργιος Καλογείτονας, Hellenic Open University (Ελληνικό Ανοικτό Πανεπιστήμιο), Patras, May 2026. Supervisor: Νικόλαος Σκλάβος. The server-side platform is in [gkalogeitonas/agronos](https://github.com/gkalogeitonas/agronos) and the WiFi sensor firmware in [gkalogeitonas/Agronos-iot-device](https://github.com/gkalogeitonas/Agronos-iot-device).
+>
+> The code exactly as referenced in the thesis text is frozen at the tag [`thesis-v1.0`](https://github.com/gkalogeitonas/ESP32-LoRa-to-Internet-Gateway/tree/thesis-v1.0) ([release](https://github.com/gkalogeitonas/ESP32-LoRa-to-Internet-Gateway/releases/tag/thesis-v1.0)). `main` may continue to evolve.
+
 This project turns a TTGO LoRa32 v2.1 board into a single-channel LoRa packet forwarder. It receives LoRa packets and forwards them to a server over the internet using either MQTT or HTTP.
 
 The main feature is its web-based configuration portal, which allows you to set up the device in the field without needing to re-flash the firmware.
